@@ -59,7 +59,7 @@ namespace ActasFunctions
             {
                 if (int.TryParse(text, out int cid))
                 {
-                    var url = $"https://tvtcrhau2vo336qa5r66p3bygy0hazyk.lambda-url.us-east-1.on.aws/?cedula=V{cid}";
+                    var url = $"https://37latuqm766patrerdf5rvdhqe0wgrug.lambda-url.us-east-1.on.aws/?cedula=V{cid}&recaptcha=placeholder";
 
                     var request = WebRequest.Create(url);
                     request.Method = "GET";
