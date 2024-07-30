@@ -46,7 +46,8 @@ namespace ActasFunctions
 
             await _botClient.SendTextMessageAsync(
                 chatId: update.Message.Chat.Id,
-                text: GetBotResponseForInput(update.Message.Text)
+                text: GetBotResponseForInput(update.Message.Text),
+                disableWebPagePreview: true
             );
         }
 
