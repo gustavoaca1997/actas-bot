@@ -64,7 +64,12 @@ namespace ActasFunctions
                 var request = WebRequest.Create(url);
                 request.Method = "GET";
 
-                using var webResponse = request.GetResponse();
+                using var webResponse = (HttpWebResponse)request.GetResponse();
+                if (webResponse.StatusCode != HttpStatusCode.OK)
+                {
+                    return "Acta no disponible o cédula incorrecta. Revisa el número de cédula o intenta más tarde.";
+                }
+
                 using var webStream = webResponse.GetResponseStream();
 
                 using var reader = new StreamReader(webStream);
