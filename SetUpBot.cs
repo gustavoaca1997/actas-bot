@@ -71,7 +71,7 @@ namespace ActasFunctions
                     dynamic obj = JsonConvert.DeserializeObject(reader.ReadToEnd());
                     if (obj == null)
                     {
-                        return "La petición para conseguir tu acta retornó información incorrecta. Esto puede ser un problema temporal. Por favor, intente de nuevo más tarde.";
+                        return GetErrorMessage("La petición para conseguir tu acta retornó información incorrecta. Esto puede ser un problema temporal. Por favor, intente de nuevo más tarde.");
                     }
                     return $"En el siguiente link puedes encontrar tu acta: {obj.url}";
                 }
@@ -82,12 +82,17 @@ namespace ActasFunctions
             }
             catch (WebException)
             {
-                return "Un error ha ocurrido obteniendo tu acta. Esto puede ser un problema temporal del lado del servidor. Disculpe y vuelva a intentar más tarde.";
+                return GetErrorMessage("Un error ha ocurrido obteniendo tu acta. Esto puede ser un problema temporal del lado del servidor. Disculpe y vuelva a intentar más tarde.");
             }
             catch (Exception)
             {
-                return "Ocurrió un problema al intentar obtener tu acta. Disculpe y vuelva a intentar más tarde.";
+                return GetErrorMessage("Ocurrió un problema al intentar obtener tu acta. Disculpe y vuelva a intentar más tarde.");
             }
+        }
+
+        private static string GetErrorMessage(string message)
+        {
+            return $"{message}\nPuedes intentar encontrar tu acta en el siguiente enlace: https://resultadosconvzla.com/";
         }
     }
 }
