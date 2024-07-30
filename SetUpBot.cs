@@ -57,21 +57,36 @@ namespace ActasFunctions
         {
             try
             {
-                var url = $"https://tvtcrhau2vo336qa5r66p3bygy0hazyk.lambda-url.us-east-1.on.aws/?cedula=V{text}";
+                if (int.TryParse(text, out int cid))
+                {
+                    var url = $"https://tvtcrhau2vo336qa5r66p3bygy0hazyk.lambda-url.us-east-1.on.aws/?cedula=V{cid}";
 
-                var request = WebRequest.Create(url);
-                request.Method = "GET";
+                    var request = WebRequest.Create(url);
+                    request.Method = "GET";
 
-                using var webResponse = request.GetResponse();
-                using var webStream = webResponse.GetResponseStream();
+                    using var webResponse = request.GetResponse();
+                    using var webStream = webResponse.GetResponseStream();
 
-                using var reader = new StreamReader(webStream);
-                dynamic obj = JsonConvert.DeserializeObject(reader.ReadToEnd());
-                return $"En el siguiente link puedes encontrar tu acta: {obj.url}";
+                    using var reader = new StreamReader(webStream);
+                    dynamic obj = JsonConvert.DeserializeObject(reader.ReadToEnd());
+                    if (obj == null)
+                    {
+                        return "La petición para conseguir tu acta retornó información incorrecta. Esto puede ser un problema temporal. Por favor, intente de nuevo más tarde.";
+                    }
+                    return $"En el siguiente link puedes encontrar tu acta: {obj.url}";
+                }
+                else
+                {
+                    return "Por favor, dime un número de cédula válido, solo los dígitos.";
+                }
             }
-            catch
+            catch (WebException)
             {
-                return "Por favor, dime un número de cédula válido.";
+                return "Un error ha ocurrido obteniendo tu acta. Esto puede ser un problema temporal del lado del servidor. Disculpe y vuelva a intentar más tarde.";
+            }
+            catch (Exception)
+            {
+                return "Ocurrió un problema al intentar obtener tu acta. Disculpe y vuelva a intentar más tarde.";
             }
         }
     }
