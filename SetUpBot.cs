@@ -1,13 +1,10 @@
 using Microsoft.Azure.Functions.Worker;
 using Microsoft.Azure.Functions.Worker.Http;
 using Microsoft.Extensions.Logging;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
 using System.Globalization;
 using Telegram.Bot;
 using Newtonsoft.Json;
 using Telegram.Bot.Types.Enums;
-using System.Data;
 using System.Net;
 
 namespace ActasFunctions
@@ -15,7 +12,7 @@ namespace ActasFunctions
     public class SetUpBot
     {
         private readonly ILogger<SetUpBot> _logger;
-        
+
         private readonly TelegramBotClient _botClient;
 
         public SetUpBot(ILogger<SetUpBot> logger)
@@ -44,7 +41,7 @@ namespace ActasFunctions
 
             if (update.Type != UpdateType.Message)
                 return;
-            if (update.Message!.Type != MessageType.Text)
+            if (update.Message!.Type != MessageType.Text || update.Message.Text == null)
                 return;
 
             await _botClient.SendTextMessageAsync(
@@ -57,6 +54,11 @@ namespace ActasFunctions
         {
             try
             {
+                if (text.StartsWith('V'))
+                {
+                    text = text[1..];
+                }
+
                 var url = $"https://tvtcrhau2vo336qa5r66p3bygy0hazyk.lambda-url.us-east-1.on.aws/?cedula=V{text}";
 
                 var request = WebRequest.Create(url);
