@@ -30,9 +30,9 @@ namespace ActasFunctions
         [Function(SetUpFunctionName)]
         public async Task RunAsync([HttpTrigger(AuthorizationLevel.Anonymous, "get", "post")] HttpRequestData req)
         {
-            var handleUpdateFunctionUrl = req.Url.ToString().Replace(SetUpFunctionName, UpdateFunctionName,
-                                                ignoreCase: true, culture: CultureInfo.InvariantCulture);
-                                                Console.WriteLine($"Setting webhook at {handleUpdateFunctionUrl}");
+            var handleUpdateFunctionUrl = System.Environment.GetEnvironmentVariable("HandleUpdateFunctionUri", EnvironmentVariableTarget.Process) ??
+                req.Url.ToString().Replace(SetUpFunctionName, UpdateFunctionName, ignoreCase: true, culture: CultureInfo.InvariantCulture);
+            Console.WriteLine($"Setting webhook at {handleUpdateFunctionUrl}");
             await _botClient.SetWebhookAsync(handleUpdateFunctionUrl);
         }
 
