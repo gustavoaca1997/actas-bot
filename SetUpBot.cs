@@ -74,7 +74,7 @@ namespace ActasFunctions
                     dynamic obj = JsonConvert.DeserializeObject(reader.ReadToEnd());
                     if (obj == null)
                     {
-                        return GetErrorMessage("La petición para conseguir tu acta retornó información incorrecta. Esto puede ser un problema temporal. Por favor, intente de nuevo más tarde.");
+                        return GetErrorMessage("El servidor no retornó tu acta. Esto puede ser un problema temporal. Por favor, intenta de nuevo más tarde.");
                     }
                     return $"En el siguiente link puedes encontrar tu acta: {obj.url}";
                 }
@@ -85,11 +85,11 @@ namespace ActasFunctions
             }
             catch (WebException)
             {
-                return GetErrorMessage("Un error ha ocurrido obteniendo tu acta. Esto puede ser un problema temporal del lado del servidor. Disculpe y vuelva a intentar más tarde.");
+                return GetErrorMessage("Un error ha ocurrido obteniendo tu acta. Esto puede ser un problema temporal del lado del servidor. Disculpa y vuelve a intentar más tarde.");
             }
             catch (Exception)
             {
-                return GetErrorMessage("Ocurrió un problema al intentar obtener tu acta. Disculpe y vuelva a intentar más tarde.");
+                return GetErrorMessage("Ocurrió un problema al intentar obtener tu acta. Disculpa y vuelve a intentar más tarde.");
             }
         }
 
