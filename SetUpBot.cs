@@ -27,9 +27,9 @@ namespace ActasFunctions
         [Function(SetUpFunctionName)]
         public async Task RunAsync([HttpTrigger(AuthorizationLevel.Anonymous, "get", "post")] HttpRequestData req)
         {
-            var handleUpdateFunctionUrl = req.Url.ToString().Replace(SetUpFunctionName, UpdateFunctionName,
-                                                ignoreCase: true, culture: CultureInfo.InvariantCulture);
-                                                Console.WriteLine($"Setting webhook at {handleUpdateFunctionUrl}");
+            var handleUpdateFunctionUrl = System.Environment.GetEnvironmentVariable("HandleUpdateFunctionUri", EnvironmentVariableTarget.Process) ??
+                req.Url.ToString().Replace(SetUpFunctionName, UpdateFunctionName, ignoreCase: true, culture: CultureInfo.InvariantCulture);
+            Console.WriteLine($"Setting webhook at {handleUpdateFunctionUrl}");
             await _botClient.SetWebhookAsync(handleUpdateFunctionUrl);
         }
 
@@ -60,27 +60,47 @@ namespace ActasFunctions
                     text = text[1..];
                 }
 
-                var url = $"https://tvtcrhau2vo336qa5r66p3bygy0hazyk.lambda-url.us-east-1.on.aws/?cedula=V{text}";
-
-                var request = WebRequest.Create(url);
-                request.Method = "GET";
-
-                using var webResponse = (HttpWebResponse)request.GetResponse();
-                if (webResponse.StatusCode != HttpStatusCode.OK)
+                if (int.TryParse(text, out int cid))
                 {
-                    return "Acta no disponible o cédula incorrecta. Revisa el número de cédula o intenta más tarde.";
+                    var url = $"https://37latuqm766patrerdf5rvdhqe0wgrug.lambda-url.us-east-1.on.aws/?cedula=V{cid}&recaptcha=placeholder";
+
+                    var request = WebRequest.Create(url);
+                    request.Method = "GET";
+
+                    using var webResponse = (HttpWebResponse)request.GetResponse();
+                    if (webResponse.StatusCode != HttpStatusCode.OK)
+                    {
+                        return "Acta no disponible o cédula incorrecta. Revisa el número de cédula o intenta más tarde.";
+                    }
+
+                    using var webStream = webResponse.GetResponseStream();
+
+                    using var reader = new StreamReader(webStream);
+                    dynamic obj = JsonConvert.DeserializeObject(reader.ReadToEnd());
+                    if (obj == null)
+                    {
+                        return GetErrorMessage("La petición para conseguir tu acta retornó información incorrecta. Esto puede ser un problema temporal. Por favor, intente de nuevo más tarde.");
+                    }
+                    return $"En el siguiente link puedes encontrar tu acta: {obj.url}";
                 }
-
-                using var webStream = webResponse.GetResponseStream();
-
-                using var reader = new StreamReader(webStream);
-                dynamic obj = JsonConvert.DeserializeObject(reader.ReadToEnd());
-                return $"En el siguiente link puedes encontrar tu acta: {obj.url}";
+                else
+                {
+                    return "Por favor, dime un número de cédula válido, solo los dígitos.";
+                }
             }
-            catch
+            catch (WebException)
             {
-                return "Por favor, dime un número de cédula válido.";
+                return GetErrorMessage("Un error ha ocurrido obteniendo tu acta. Esto puede ser un problema temporal del lado del servidor. Disculpe y vuelva a intentar más tarde.");
             }
+            catch (Exception)
+            {
+                return GetErrorMessage("Ocurrió un problema al intentar obtener tu acta. Disculpe y vuelva a intentar más tarde.");
+            }
+        }
+
+        private static string GetErrorMessage(string message)
+        {
+            return $"{message}\nPuedes intentar encontrar tu acta en el siguiente enlace: https://resultadosconvzla.com/";
         }
     }
 }
